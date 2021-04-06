@@ -1,6 +1,6 @@
 /**
 
- @Name：layui.form 表单组件
+ @Name：form 表单组件
  @License：MIT
 
  */
@@ -710,9 +710,11 @@ layui.define('layer', function(exports){
   //自动完成渲染
   var form = new Form()
   ,$dom = $(document), $win = $(window);
-
-  form.render();
-
+  
+  $(function(){
+    form.render();
+  });
+  
   //表单reset重置渲染
   $dom.on('reset', ELEM, function(){
     var filter = $(this).attr('lay-filter');

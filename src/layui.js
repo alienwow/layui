@@ -17,7 +17,7 @@
   }
 
   ,Layui = function(){
-    this.v = '2.6.0'; //版本号
+    this.v = '2.6.3'; //版本号
   }
 
   //获取layui所在目录
@@ -46,7 +46,7 @@
   ,isOpera = typeof opera !== 'undefined' && opera.toString() === '[object Opera]'
 
   //内置模块
-  ,modules = {
+  ,modules = config.builtin = {
     lay: 'lay' //基础 DOM 操作
     ,layer: 'layer' //弹层
     ,laydate: 'laydate' //日期
@@ -69,7 +69,8 @@
     ,code: 'code' //代码修饰器
     ,jquery: 'jquery' //DOM 库（第三方）
     
-    ,'layui.all': '../layui' //聚合
+    ,all: 'all'
+    ,'layui.all': 'layui.all' //聚合标识（功能性的，非真实模块）
   };
 
   //记录基础数据
@@ -98,28 +99,39 @@
       deps = []
     );
     
-    that.use(deps, callback);
+    that.use(deps, callback, null, 'define');
     return that;
   };
 
   //使用特定模块
-  Layui.prototype.use = function(apps, callback, exports){
+  Layui.prototype.use = function(apps, callback, exports, from){
     var that = this
     ,dir = config.dir = config.dir ? config.dir : getPath
     ,head = doc.getElementsByTagName('head')[0];
 
-    apps = typeof apps === 'string' ? [apps] : apps;
+    apps = function(){
+      if(typeof apps === 'string'){
+        return [apps];
+      } 
+      //当第一个参数为 function 时，则自动加载所有内置模块，且执行的回调即为该 function 参数；
+      else if(typeof apps === 'function'){
+        callback = apps;
+        return ['all'];
+      }      
+      return apps;
+    }();
     
-    // layui内部强制使用自带的 jquery, 若外部使用高版本的jquery（3.2.x），Transfer组件将无法正常展示
-    // //如果页面已经存在jQuery1.7+库且所定义的模块依赖jQuery，则不加载内部jquery模块
-    // if(window.jQuery && jQuery.fn.on){
-    //   that.each(apps, function(index, item){
-    //     if(item === 'jquery'){
-    //       apps.splice(index, 1);
-    //     }
-    //   });
-    //   layui.jquery = layui.$ = jQuery;
-    // }
+    //如果页面已经存在 jQuery 1.7+ 库且所定义的模块依赖 jQuery，则不加载内部 jquery 模块
+    /*
+    if(window.jQuery && jQuery.fn.on){
+      that.each(apps, function(index, item){
+        if(item === 'jquery'){
+          apps.splice(index, 1);
+        }
+      });
+      layui.jquery = layui.$ = jQuery;
+    }
+    */
     
     var item = apps[0]
     ,timeout = 0;
@@ -142,19 +154,25 @@
         }());
       }
     }
-    
+  
     //回调
     function onCallback(){
       exports.push(layui[item]);
       apps.length > 1 ?
-        that.use(apps.slice(1), callback, exports)
-      : ( typeof callback === 'function' && callback.apply(layui, exports) );
+        that.use(apps.slice(1), callback, exports, from)
+      : ( typeof callback === 'function' && function(){
+        //保证文档加载完毕再执行回调
+        if(layui.jquery && typeof layui.jquery === 'function' && from !== 'define'){
+          return layui.jquery(function(){
+            callback.apply(layui, exports);
+          });
+        }
+        callback.apply(layui, exports);
+      }() );
     }
     
     //如果引入了聚合板，内置的模块则不必重复加载
-    if(apps.length === 0 
-    || (layui['layui.all'] && modules[item]) 
-    ){
+    if( apps.length === 0 || (layui['layui.all'] && modules[item]) ){
       return onCallback(), that;
     }
     

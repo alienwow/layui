@@ -1,17 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>完整库使用 - layui</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>完整库使用 - layui</title>
 
-<link rel="stylesheet" href="../src/css/layui.css">
+  <link rel="stylesheet" href="../src/css/layui.css">
 
-<style>
-body{padding: 10px;}
-</style>
+  <style>
+    body{padding: 10px;}
+  </style>
+  
 </head>
 <body>
+
+<textarea style="
+  position: fixed; 
+  top: 0; 
+  bottom: 0; 
+  right:0; 
+  width: 100px; 
+  background-color:#666; 
+  z-index:100; 
+resize: none;">
+
+</textarea>
+
 
 <div id="demo1"></div>
 <button class="layui-btn demo" test-active="test-form">测试弹出式 Form</button>
@@ -27,7 +41,14 @@ body{padding: 10px;}
   </ul>
   <div class="layui-tab-content">
     <div class="layui-tab-item layui-show">
-      内容1
+      <div class="layui-form">
+        <select name="city" lay-verify="">
+          <option value="">请选择一个城市</option>
+          <option value="010">北京</option>
+          <option value="021">上海</option>
+          <option value="0571">杭州</option>
+        </select>  
+      </div>
     </div>
     <div class="layui-tab-item">
       <div id="test2" class="demo-transfer"></div>
@@ -41,7 +62,10 @@ body{padding: 10px;}
 
 <script src="../dist/layui.js"></script>
 <script>
-;!function(){
+console.log(layui.dropdown);
+
+//(function(){
+layui.use(function(){
   var $ = layui.jquery
   ,layer = layui.layer
   ,form = layui.form
@@ -50,23 +74,24 @@ body{padding: 10px;}
   ,transfer = layui.transfer
   ,util = layui.util;
   
-  layer.ready(function(){
-    layer.msg('hello');
-  });
+  layer.msg('hello');
   
   laypage.render({
     elem: 'demo1'
     ,count: 100 //总页数
   });
   
+  console.log(lay('#footer').html());
   
   //测试加载非内置模块
+  /*
   layui.config({
     base: 'extends/'
   }).extend({
     mod1: 'mod1'
     ,mod2: 'mod2'
   }).use('mod1');
+  */
   
   
   //定义标题及数据源
@@ -131,7 +156,21 @@ body{padding: 10px;}
       });
     }
   });
-}();
+  
+});
+//})();
 </script>
+
+
+
+<span class="layui-breadcrumb" lay-separator="-">
+  <a href="">首页</a>
+  <a href="">国际新闻</a>
+  <a href="">亚太地区</a>
+  <a><cite>正文</cite></a>
+</span>
+
+<div id="footer">© footer</div>
+
 </body>
 </html>
